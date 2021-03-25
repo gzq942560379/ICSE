@@ -35,7 +35,11 @@ class MNIST_MLP(object):
         self.net.setInputShape(batch_size, input_size, 1, 1)
         # fc1
         self.net.createMlpLayer('fc1', hidden1, self.input_quant_params[0])
-        __________________
+        self.net.createReLuLayer("relu1")    
+        self.net.createMlpLayer("fc2",hidden2,self.input_quant_params[1]) 
+        self.net.createReLuLayer("relu2")    
+        self.net.createMlpLayer("fc3",out_classes,self.input_quant_params[2])        
+        self.net.createSoftmaxLayer("softmax",1)    
     
     def load_mnist(self, file_dir, is_images = 'True'):
         # Read binary data
@@ -60,8 +64,8 @@ class MNIST_MLP(object):
     
     def load_data(self, data_path, label_path):
         print('Loading MNIST data from files...')
-        test_images = __________________
-        test_labels = __________________
+        test_images = self.load_mnist(data_path, True)
+        test_labels = self.load_mnist(label_path, False)
         self.test_data = np.append(test_images, test_labels, axis=1)
 
     def load_model(self, param_dir):  # 加载参数
@@ -75,11 +79,12 @@ class MNIST_MLP(object):
         
         weigh2 = np.transpose(params['w2'], [1, 0]).flatten().astype(np.float64)
         bias2 = params['b2'].flatten().astype(np.float64)
-        __________________
+        self.net.loadParams(2, weigh2, bias2, self.filter_quant_params[1])
 
         weigh3 = np.transpose(params['w3'], [1, 0]).flatten().astype(np.float64)
         bias3 = params['b3'].flatten().astype(np.float64)
-        __________________
+        self.net.loadParams(4, weigh3, bias3, self.filter_quant_params[2])
+
     
     def forward(self):
         return self.net.forward()
@@ -110,8 +115,8 @@ class MNIST_MLP(object):
         accuracy = np.mean(pred_results == self.test_data[:,-1])
         print('Accuracy in test set: %f' % accuracy)
 
-HIDDEN1 = 32
-HIDDEN2 = 16
+HIDDEN1 = 1024
+HIDDEN2 = 512
 OUT = 10
 def run_mnist():
     batch_size = 10000

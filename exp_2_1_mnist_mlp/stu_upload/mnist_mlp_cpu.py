@@ -146,7 +146,7 @@ class MNIST_MLP(object):
         print('Accuracy in test set: %f' % accuracy)
 
 def build_mnist_mlp(param_dir='weight.npy'):
-    h1, h2, e = 256, 128, 10
+    h1, h2, e = 1024, 512, 10
     mlp = MNIST_MLP(hidden1=h1, hidden2=h2, max_epoch=e)
     mlp.load_data()
     mlp.build_model()
