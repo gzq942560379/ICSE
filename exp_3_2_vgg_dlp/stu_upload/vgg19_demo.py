@@ -24,7 +24,6 @@ class VGG19(object):
         params = np.load(quant_param_path)
         input_params = params['input']
         filter_params = params['filter']
-
         for i in range(0, len(input_params), 2):
             self.input_quant_params.append(pycnml.QuantParam(int(input_params[i]), float(input_params[i+1])))
         for i in range(0, len(filter_params), 2):
@@ -74,7 +73,7 @@ class VGG19(object):
         self.net.createConvLayer('conv5_4', 512, 3, 1, 1, 1, self.input_quant_params[15])
         self.net.createReLuLayer('relu5_4')
         self.net.createPoolingLayer('pool5', 2, 2)  
-
+        
         self.net.createFlattenLayer('flatten', [1, 512 * 7 * 7, 1, 1])
         
         self.net.createMlpLayer('fc6', 4096, self.input_quant_params[16])
@@ -82,7 +81,7 @@ class VGG19(object):
         self.net.createMlpLayer('fc7', 4096, self.input_quant_params[17])
         self.net.createReLuLayer('relu7')
         self.net.createMlpLayer('fc8', 1000, self.input_quant_params[18])
-        
+
         self.net.createSoftmaxLayer('softmax', 1)
     
     def load_model(self):
@@ -96,17 +95,17 @@ class VGG19(object):
         for idx in range(self.net.size()):
             if 'conv' in self.net.getLayerName(idx):
                 weight, bias = params['layers'][0][idx][0][0][0][0]
-                # TODO：调整权重形状
                 # matconvnet: weights dim [height, width, in_channel, out_channel]
                 # ours: weights dim [out_channel, in_channel, height, width]
-                weight = weight.transpose(3,2,0,1).flatten().astype(np.float)
+                weight = np.transpose(weight,[3,2,0,1]).flatten().astype(np.float)
                 bias = bias.reshape(-1).astype(np.float)
                 self.net.loadParams(idx, weight, bias, self.filter_quant_params[count])
                 count += 1
             if 'fc' in self.net.getLayerName(idx):
                 # Loading params may take quite a while. Please be patient.
                 weight, bias = params['layers'][0][idx-1][0][0][0][0]
-                weight = np.reshape(weight,[-1,weight.shape[-1]]).flatten().astype(np.float)
+                weight = weight.reshape([weight.shape[0]*weight.shape[1]*weight.shape[2], weight.shape[3]])
+                weight = np.transpose(weight, [1, 0]).flatten().astype(np.float)
                 bias = bias.reshape(-1).astype(np.float)
                 self.net.loadParams(idx, weight, bias, self.filter_quant_params[count])
                 count += 1
@@ -122,9 +121,8 @@ class VGG19(object):
         input_image -= image_mean
         input_image = np.reshape(input_image, [1]+list(input_image.shape))
         # input dim [N, channel, height, width]
-        # TODO：调整输入数据的形状
-        input_image = np.transpose(self.input_image,[0,3,1,2])
-        input_data = input_image
+        input_image = np.transpose(input_image, [0, 3, 1, 2])
+        input_data = input_image.flatten().astype(np.float)
         self.net.setInputData(input_data)
 
     def forward(self):
