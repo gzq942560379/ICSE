@@ -99,14 +99,14 @@ class VGG19(object):
                 # TODO：调整权重形状
                 # matconvnet: weights dim [height, width, in_channel, out_channel]
                 # ours: weights dim [out_channel, in_channel, height, width]
-                weight = weight.transpose(3,2,0,1).astype(np.float)
+                weight = weight.transpose(3,2,0,1).flatten().astype(np.float)
                 bias = bias.reshape(-1).astype(np.float)
                 self.net.loadParams(idx, weight, bias, self.filter_quant_params[count])
                 count += 1
             if 'fc' in self.net.getLayerName(idx):
                 # Loading params may take quite a while. Please be patient.
                 weight, bias = params['layers'][0][idx-1][0][0][0][0]
-                weight = np.reshape(weight,[-1,weight.shape[-1]]).astype(np.float)
+                weight = np.reshape(weight,[-1,weight.shape[-1]]).flatten().astype(np.float)
                 bias = bias.reshape(-1).astype(np.float)
                 self.net.loadParams(idx, weight, bias, self.filter_quant_params[count])
                 count += 1
