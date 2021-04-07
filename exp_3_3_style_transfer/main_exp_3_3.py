@@ -61,7 +61,7 @@ def test_speed_up():
 
 if __name__ == '__main__':
     np.random.seed(1234)
-    test_speed_up()
+    # test_speed_up()
     print('-------------------------')
     CONTENT_LOSS_LAYERS = ['relu4_2']
     STYLE_LOSS_LAYERS = ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1']
@@ -70,6 +70,7 @@ if __name__ == '__main__':
     TRAIN_STEP = 100
     LEARNING_RATE = 1.0
     IMAGE_HEIGHT, IMAGE_WIDTH = 192, 320
+    # IMAGE_HEIGHT, IMAGE_WIDTH = 24, 40
 
     vgg = VGG19(param_path='../imagenet-vgg-verydeep-19.mat')
     vgg.build_model()
@@ -93,23 +94,18 @@ if __name__ == '__main__':
         content_diff = np.zeros(transfer_image.shape)
         style_diff = np.zeros(transfer_image.shape)
         for layer in CONTENT_LOSS_LAYERS:
-            # TODO： 计算内容损失的前向传播
-            current_loss = _______________________
+            current_loss = content_loss_layer.forward(transfer_layers[layer], content_layers[layer])
             content_loss = np.append(content_loss, current_loss)
-            # TODO： 计算内容损失的反向传播
             dloss = content_loss_layer.backward(transfer_layers[layer], content_layers[layer])
-            content_diff += _______________________
+            content_diff += vgg.backward(dloss, layer)
         for layer in STYLE_LOSS_LAYERS:
-            # TODO： 计算风格损失的前向传播
-            current_loss = _______________________
+            current_loss = style_loss_layer.forward(transfer_layers[layer], style_layers[layer])
             style_loss = np.append(style_loss, current_loss)
-            # TODO： 计算风格损失的反向传播
             dloss = style_loss_layer.backward(transfer_layers[layer], style_layers[layer])
-            style_diff += _______________________
+            style_diff += vgg.backward(dloss, layer)
         total_loss = ALPHA * np.mean(content_loss) + BETA * np.mean(style_loss)
         image_diff = ALPHA * content_diff / len(CONTENT_LOSS_LAYERS) + BETA * style_diff / len(STYLE_LOSS_LAYERS)
-        # TODO： 利用Adam优化器对风格迁移图像进行更新
-        transfer_image = _______________________
+        transfer_image = adam_optimizer.update(transfer_image, image_diff)
         if step % 1 == 0:
             print('Step %d, loss = %f' % (step, total_loss), content_loss, style_loss)
             print('cost time: %f'%(time.time() - start))

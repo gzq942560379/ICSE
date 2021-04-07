@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export LC_ALL=C
+
 UNAME_V=`cat /etc/issue | head -n 1`
 
 let INDEX=`expr "$UNAME_V" : ".*Debian.*"`
