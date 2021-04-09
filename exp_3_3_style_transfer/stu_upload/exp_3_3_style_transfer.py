@@ -26,7 +26,7 @@ class VGG19(object):
         # 可以通过设置 type=1 来使用优化后的卷积和池化层，如 ConvolutionalLayer(3, 3, 64, 1, 1, type=1)
         print('Building vgg-19 model...')
 
-        self.type = 0
+        self.type = 1
 
         self.layers = {}
         self.layers['conv1_1'] = ConvolutionalLayer(3, 3, 64, 1, 1, self.type)
@@ -176,9 +176,12 @@ if __name__ == '__main__':
     STYLE_LOSS_LAYERS = ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1']
     NOISE = 0.5
     ALPHA, BETA = 1, 500
-    TRAIN_STEP = 100
+    # TRAIN_STEP = 100
+    TRAIN_STEP = 20
     LEARNING_RATE = 1.0
-    IMAGE_HEIGHT, IMAGE_WIDTH = 192, 320
+    # IMAGE_HEIGHT, IMAGE_WIDTH = 192, 320
+    # IMAGE_HEIGHT, IMAGE_WIDTH = 48, 80
+    IMAGE_HEIGHT, IMAGE_WIDTH = 96, 160
 
     vgg = VGG19()
     vgg.build_model()
@@ -192,6 +195,7 @@ if __name__ == '__main__':
         '../../weinisi.jpg', IMAGE_HEIGHT, IMAGE_WIDTH)
     style_image, _ = vgg.load_image(
         '../../style.jpg', IMAGE_HEIGHT, IMAGE_WIDTH)
+
     content_layers = vgg.forward(content_image, CONTENT_LOSS_LAYERS)
     style_layers = vgg.forward(style_image, STYLE_LOSS_LAYERS)
     transfer_image = get_random_img(content_image, NOISE)
@@ -204,30 +208,20 @@ if __name__ == '__main__':
         content_diff = np.zeros(transfer_image.shape)
         style_diff = np.zeros(transfer_image.shape)
         for layer in CONTENT_LOSS_LAYERS:
-            # TODO： 计算内容损失的前向传播
-            current_loss = content_loss_layer.forward(
-                transfer_layers[layer], content_layers[layer])
+            current_loss = content_loss_layer.forward(transfer_layers[layer], content_layers[layer])
             content_loss = np.append(content_loss, current_loss)
-            # TODO： 计算内容损失的反向传播
-            dloss = content_loss_layer.backward(
-                transfer_layers[layer], content_layers[layer])
-            content_diff += dloss
+            dloss = content_loss_layer.backward(transfer_layers[layer], content_layers[layer])
+            content_diff += vgg.backward(dloss, layer)
         for layer in STYLE_LOSS_LAYERS:
-            # TODO： 计算风格损失的前向传播
-            current_loss = style_loss_layer.forward(
-                transfer_layers[layer], style_layers[layer])
+            current_loss = style_loss_layer.forward(transfer_layers[layer], style_layers[layer])
             style_loss = np.append(style_loss, current_loss)
-            # TODO： 计算风格损失的反向传播
-            dloss = style_loss_layer.backward(
-                transfer_layers[layer], style_layers[layer])
-            style_diff += dloss
+            dloss = style_loss_layer.backward(transfer_layers[layer], style_layers[layer])
+            style_diff += vgg.backward(dloss, layer)
         total_loss = ALPHA * np.mean(content_loss) + BETA * np.mean(style_loss)
-        image_diff = ALPHA * content_diff / \
-            len(CONTENT_LOSS_LAYERS) + BETA * \
-            style_diff / len(STYLE_LOSS_LAYERS)
+        image_diff = ALPHA * content_diff / len(CONTENT_LOSS_LAYERS) + BETA * style_diff / len(STYLE_LOSS_LAYERS)
         # TODO： 利用Adam优化器对风格迁移图像进行更新
         transfer_image = adam_optimizer.update(transfer_image, image_diff)
-        if step % 20 == 0:
+        if step % 1 == 0:
             print('Step %d, loss = %f' %
                   (step, total_loss), content_loss, style_loss)
             vgg.save_image(transfer_image, content_shape,

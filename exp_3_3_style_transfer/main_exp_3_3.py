@@ -50,6 +50,7 @@ def test_speed_up():
 
     speedup_conv_forward_mse = computeMse(conv_forward_result.flatten(), speedup_conv_forward_result.flatten())
     speedup_conv_backward_mse = computeMse(conv_backward_result.flatten(), speedup_conv_backward_result.flatten())
+
     if speedup_conv_forward_mse < 0.003 and speedup_conv_backward_mse < 0.003:
         print('SPEEDUP CONV TEST PASS.')
     else:
@@ -61,7 +62,7 @@ def test_speed_up():
 
 if __name__ == '__main__':
     np.random.seed(1234)
-    # test_speed_up()
+    test_speed_up()
     print('-------------------------')
     CONTENT_LOSS_LAYERS = ['relu4_2']
     STYLE_LOSS_LAYERS = ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1']
@@ -70,7 +71,6 @@ if __name__ == '__main__':
     TRAIN_STEP = 100
     LEARNING_RATE = 1.0
     IMAGE_HEIGHT, IMAGE_WIDTH = 192, 320
-    # IMAGE_HEIGHT, IMAGE_WIDTH = 24, 40
 
     vgg = VGG19(param_path='../imagenet-vgg-verydeep-19.mat')
     vgg.build_model()
@@ -103,6 +103,7 @@ if __name__ == '__main__':
             style_loss = np.append(style_loss, current_loss)
             dloss = style_loss_layer.backward(transfer_layers[layer], style_layers[layer])
             style_diff += vgg.backward(dloss, layer)
+        # print("content loss :{} ,style loss :{}".format(np.mean(content_loss),np.mean(style_loss)))
         total_loss = ALPHA * np.mean(content_loss) + BETA * np.mean(style_loss)
         image_diff = ALPHA * content_diff / len(CONTENT_LOSS_LAYERS) + BETA * style_diff / len(STYLE_LOSS_LAYERS)
         transfer_image = adam_optimizer.update(transfer_image, image_diff)
