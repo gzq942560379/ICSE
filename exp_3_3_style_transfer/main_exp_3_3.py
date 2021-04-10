@@ -72,6 +72,7 @@ if __name__ == '__main__':
     LEARNING_RATE = 1.0
     IMAGE_HEIGHT, IMAGE_WIDTH = 192, 320
 
+
     vgg = VGG19(param_path='../imagenet-vgg-verydeep-19.mat')
     vgg.build_model()
     vgg.init_model()
@@ -103,7 +104,6 @@ if __name__ == '__main__':
             style_loss = np.append(style_loss, current_loss)
             dloss = style_loss_layer.backward(transfer_layers[layer], style_layers[layer])
             style_diff += vgg.backward(dloss, layer)
-        # print("content loss :{} ,style loss :{}".format(np.mean(content_loss),np.mean(style_loss)))
         total_loss = ALPHA * np.mean(content_loss) + BETA * np.mean(style_loss)
         image_diff = ALPHA * content_diff / len(CONTENT_LOSS_LAYERS) + BETA * style_diff / len(STYLE_LOSS_LAYERS)
         transfer_image = adam_optimizer.update(transfer_image, image_diff)

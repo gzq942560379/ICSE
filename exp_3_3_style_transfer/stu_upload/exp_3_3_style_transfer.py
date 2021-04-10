@@ -137,6 +137,7 @@ class VGG19(object):
         layer_idx = list.index(self.param_layer_name, layer_name)
         for idx in range(layer_idx, -1, -1):
             # TODO： 计算VGG19网络的反向传播
+            # print("{} backward ".format(self.param_layer_name[idx]))
             dloss = self.layers[self.param_layer_name[idx]].backward(dloss)
 
         #print('Backward time: %f' % (time.time()-start_time))
@@ -176,12 +177,9 @@ if __name__ == '__main__':
     STYLE_LOSS_LAYERS = ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1']
     NOISE = 0.5
     ALPHA, BETA = 1, 500
-    # TRAIN_STEP = 100
-    TRAIN_STEP = 20
+    TRAIN_STEP = 100
     LEARNING_RATE = 1.0
-    # IMAGE_HEIGHT, IMAGE_WIDTH = 192, 320
-    # IMAGE_HEIGHT, IMAGE_WIDTH = 48, 80
-    IMAGE_HEIGHT, IMAGE_WIDTH = 96, 160
+    IMAGE_HEIGHT, IMAGE_WIDTH = 192, 320
 
     vgg = VGG19()
     vgg.build_model()

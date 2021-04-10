@@ -14,7 +14,7 @@ class ContentLossLayer(object):
         return loss
     def backward(self, input_layer, content_layer):
         # TODO： 计算内容损失的反向传播
-        bottom_diff = (input_layer-content_layer)/input_layer.size
+        bottom_diff = (input_layer - content_layer) / input_layer.size
         return bottom_diff
 
 class StyleLossLayer(object):
@@ -42,6 +42,8 @@ class StyleLossLayer(object):
         # TODO： 计算风格迁移图像和目标风格图像的风格损失
         self.style_diff = self.gram_input - self.gram_style
         loss =  np.sum(self.style_diff**2)/(4*input_layer.shape[0]*self.div)
+
+
         return loss
 
 
@@ -53,4 +55,5 @@ class StyleLossLayer(object):
             for idxci in range(input_layer.shape[1]):
                 bottom_diff[idxn, idxci, :] = np.sum(input_layer_reshape[idxn,:,:] * np.reshape(self.style_diff[idxn,:,idxci],[-1,1]),axis=0)/(input_layer.shape[0]*self.div)
         bottom_diff = np.reshape(bottom_diff, input_layer.shape)
+
         return bottom_diff

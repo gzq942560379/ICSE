@@ -4,20 +4,19 @@ import struct
 import os
 import time
 
-
 def im2col(im,kernel_size,stride):
     assert im.ndim == 4
     N,channel,height_in,width_in = im.shape
     height_out = (height_in - kernel_size) / stride + 1
     width_out = (width_in - kernel_size) / stride + 1
-    col = np.zeros([channel,kernel_size,kernel_size,N,height_out,width_out])
-    for idxci in range(channel):
-        for idxki in range(kernel_size):
-            for idxkj in range(kernel_size):
-                col[idxci,idxki,idxkj,:,:,:] = im[:,idxci,
-                                                idxki*stride:idxki*stride+height_out,
-                                                idxkj*stride:idxkj*stride+width_out]
-    col = col.reshape([channel*kernel_size*kernel_size,N*height_out*width_out])
+    col = np.zeros([N,height_out,width_out,channel,kernel_size,kernel_size])
+    for idxn in range(N):
+        for idxh in range(height_out):
+            for idxw in range(width_out):
+                col[idxn,idxh,idxw,:,:,:] = im[idxn,:,
+                                                idxh*stride:idxh*stride+kernel_size,
+                                                idxw*stride:idxw*stride+kernel_size,]
+    col = col.reshape([N*height_out*width_out,channel*kernel_size*kernel_size]).transpose([1,0])
     return col
 
 class ConvolutionalLayer(object):
@@ -77,6 +76,7 @@ class ConvolutionalLayer(object):
         return self.output
 
     def backward_speedup(self, top_diff):
+
         start_time = time.time()
         # self.d_weight = np.zeros(self.weight.shape)
         # self.d_bias = np.zeros(self.bias.shape)
@@ -93,13 +93,15 @@ class ConvolutionalLayer(object):
                      self.padding:self.padding+top_diff.shape[2],
                      self.padding:self.padding+top_diff.shape[3]] = top_diff
         # top_diff [N*height_out*width_out,channel_out]
-        top_diff_reshape = top_diff.transpose([0,2,3,1]).reshape([N*top_diff_height*top_diff_width,channel_out])
-        # [channel_in*self.kernel_size*self.kernel_size ,channel_out]
-        self.d_weight = np.matmul(self.input_col,top_diff_reshape).reshape([self.channel_in,self.kernel_size,self.kernel_size,self.channel_out])
-        # [self.channel_out]
-        self.d_bias = np.sum(top_diff_reshape,axis = 0)
+        # top_diff_reshape = top_diff.transpose([0,2,3,1]).reshape([N*top_diff_height*top_diff_width,channel_out])
+        # # [channel_in*self.kernel_size*self.kernel_size ,channel_out]
+        # self.d_weight = np.matmul(self.input_col,top_diff_reshape).reshape([self.channel_in,self.kernel_size,self.kernel_size,self.channel_out])
+        # # [self.channel_out]
+        # self.d_bias = np.sum(top_diff_reshape,axis = 0)
         # weight_col [channel_in,channel_out,kernel_size,kernel_size]
-        weight_col = self.weight.transpose([0,3,1,2]).reshape([self.channel_in,self.channel_out*self.kernel_size*self.kernel_size])
+        weight_col = np.flip(self.weight.transpose([0,3,1,2]),(2,3)).reshape([self.channel_in,self.channel_out*self.kernel_size*self.kernel_size])
+        # weight_col = self.weight.transpose([0,3,1,2]).reshape([self.channel_in,self.channel_out*self.kernel_size*self.kernel_size])
+        
         # [channel_out,kernel_size,kernel_size,N,height_in,width_in]
         top_diff_col = im2col(top_diff_pad,self.kernel_size,self.stride)
         # [channel_in,N,height_in,width_in]
@@ -108,6 +110,7 @@ class ConvolutionalLayer(object):
         bottom_diff = bottom_diff.reshape([self.channel_in,N,bottom_diff_height,bottom_diff_width]).transpose([1,0,2,3])
         
         self.backward_time = time.time() - start_time
+
         return bottom_diff
 
     def forward_raw(self, input):
@@ -160,7 +163,9 @@ class ConvolutionalLayer(object):
                                                                        idxh * self.stride: idxh*self.stride+self.kernel_size,
                                                                        idxw * self.stride: idxw*self.stride+self.kernel_size] * top_diff[idxn, idxc, idxh, idxw]
                         self.d_bias[idxc] += top_diff[idxn, idxc, idxh, idxw]
-        weight = self.weight.transpose([3,1,2,0])
+        
+        weight = np.flip(self.weight.transpose([3,1,2,0]),(1,2))
+
         for idxn in range(top_diff.shape[0]):
             for idxc in range(self.channel_in):
                 for idxh in range(bottom_diff_height):
@@ -252,6 +257,7 @@ class MaxPoolingLayer(object):
     
     def backward_speedup(self, top_diff):
         # TODO: 改进backward函数，使得计算加速
+
         N ,channel_in,height_out,width_out = top_diff.shape
         assert self.kernel_size == self.stride
         height_in = height_out * self.kernel_size
@@ -264,10 +270,11 @@ class MaxPoolingLayer(object):
                     for idxw in range(top_diff.shape[3]):
                         max_index = self.max_index[idxn,idxc,idxh,idxw]
                         tmp = np.zeros(self.kernel_size*self.kernel_size)
-                        tmp[max_index] = self.input_col[idxn,idxc,idxh,idxw,max_index]
+                        tmp[max_index] = top_diff[idxn,idxc,idxh,idxw]
                         bottom_diff[idxn,idxc,
                                     idxh*self.stride:idxh*self.stride+self.kernel_size,
                                     idxw*self.stride:idxw*self.stride+self.kernel_size] = tmp.reshape(self.kernel_size,self.kernel_size)
+        
         return bottom_diff
 
     def backward_raw(self, top_diff):
