@@ -68,7 +68,7 @@ if __name__ == '__main__':
     STYLE_LOSS_LAYERS = ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1']
     NOISE = 0.5
     ALPHA, BETA = 1, 500
-    TRAIN_STEP = 100
+    TRAIN_STEP = 1000
     LEARNING_RATE = 1.0
     IMAGE_HEIGHT, IMAGE_WIDTH = 192, 320
 
@@ -107,7 +107,7 @@ if __name__ == '__main__':
         total_loss = ALPHA * np.mean(content_loss) + BETA * np.mean(style_loss)
         image_diff = ALPHA * content_diff / len(CONTENT_LOSS_LAYERS) + BETA * style_diff / len(STYLE_LOSS_LAYERS)
         transfer_image = adam_optimizer.update(transfer_image, image_diff)
-        if step % 1 == 0:
+        if step % 20 == 0:
             print('Step %d, loss = %f' % (step, total_loss), content_loss, style_loss)
             print('cost time: %f'%(time.time() - start))
             vgg.save_image(transfer_image, content_shape, 'output/output_' + str(step) + '.jpg')

@@ -92,6 +92,9 @@ class ConvolutionalLayer(object):
         top_diff_pad[:, :,
                      self.padding:self.padding+top_diff.shape[2],
                      self.padding:self.padding+top_diff.shape[3]] = top_diff
+
+        # d_weight , d_bias need not compute
+
         # top_diff [N*height_out*width_out,channel_out]
         # top_diff_reshape = top_diff.transpose([0,2,3,1]).reshape([N*top_diff_height*top_diff_width,channel_out])
         # # [channel_in*self.kernel_size*self.kernel_size ,channel_out]
@@ -99,6 +102,7 @@ class ConvolutionalLayer(object):
         # # [self.channel_out]
         # self.d_bias = np.sum(top_diff_reshape,axis = 0)
         # weight_col [channel_in,channel_out,kernel_size,kernel_size]
+        
         weight_col = np.flip(self.weight.transpose([0,3,1,2]),(2,3)).reshape([self.channel_in,self.channel_out*self.kernel_size*self.kernel_size])
         # weight_col = self.weight.transpose([0,3,1,2]).reshape([self.channel_in,self.channel_out*self.kernel_size*self.kernel_size])
         
