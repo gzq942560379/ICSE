@@ -1,2 +1,5 @@
 *.pyc
 *.mat
+exp_4/env/neuware
+exp_4/env/tensorflow-v1.10
+
