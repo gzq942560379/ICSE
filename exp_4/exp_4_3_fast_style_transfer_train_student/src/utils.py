@@ -12,11 +12,12 @@ def scale_img(style_path, style_scale):
     style_target = _get_img(style_path, img_size=new_shape)
     return style_target
 
-def get_img(src, img_size=False):
-   #TODO: 使用 scipy.misc 模块读入输入图像 src 并转化成’RGB’ 模式，返回 ndarray 类型数组 img
-    img = ______________________
-    ______________________
-   return img
+def get_img(src, img_size=None):
+    #TODO: 使用 scipy.misc 模块读入输入图像 src 并转化成’RGB’ 模式，返回 ndarray 类型数组 img
+    image = scipy.misc.imread(src,mode='RGB')
+    if img_size != None:
+        image = scipy.misc.imresize(image,img_size)
+    return image
 
 def exists(p, msg):
     assert os.path.exists(p), msg

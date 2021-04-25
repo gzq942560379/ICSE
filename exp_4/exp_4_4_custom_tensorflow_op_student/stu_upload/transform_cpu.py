@@ -1,3 +1,4 @@
+# coding:utf-8
 import os
 import tensorflow as tf
 from tensorflow.python.platform import gfile
@@ -64,11 +65,16 @@ def run_ori_power_diff_pb(ori_power_diff_pb, image):
         img = cv.imread(image)
         X = cv.resize(img, (256, 256))
         with tf.Session(config=config) as sess:
-            # TODO：完成PowerDifference Pb模型的推理
-            _________________
+            sess.graph.as_default()
+            sess.run(tf.global_variables_initializer())
 
+            input_tensor = sess.graph.get_tensor_by_name('X_content:0')
+            output_tensor = sess.graph.get_tensor_by_name('add_37:0')
+
+            power_input_tensor = sess.graph.get_tensor_by_name("moments_15/PowerDifference_z:0")
+            pow = np.array([2],dtype=np.float32)
             start_time = time.time()
-            ret =sess.run(...)
+            ret =sess.run(output_tensor, feed_dict={input_tensor:[X],power_input_tensor:pow})
             end_time = time.time()
             print("C++ inference(CPU) time is: ",end_time-start_time)
             img1 = tf.reshape(ret,[256,256,3])
@@ -92,11 +98,24 @@ def run_numpy_pb(numpy_pb, image):
         X = cv.resize(img, (256, 256))
         with tf.Session(config=config) as sess:
             # TODO：完成Numpy版本 Pb模型的推理
-            _________________
-
+            sess.graph.as_default()
+            sess.run(tf.global_variables_initializer())
             start_time = time.time()
-            _________________
-            ret = sess.run(...)
+
+            input_tensor = sess.graph.get_tensor_by_name('X_content:0')
+            output_tensor_1 = sess.graph.get_tensor_by_name('Conv2D_13:0')
+            output_tensor_2 = sess.graph.get_tensor_by_name('moments_15/StopGradient:0')
+
+            input_x,input_y = sess.run([output_tensor_1,output_tensor_2],feed_dict={input_tensor:[X]})
+
+            input_pow = 2
+            power_output = power_diff_numpy(input_x,input_y,input_pow).reshape([1,256,256,3])
+
+            input_tensor_new = sess.graph.get_tensor_by_name('moments_15/PowerDifference:0')
+            output_tensor = sess.graph.get_tensor_by_name('add_37:0')
+
+            ret = sess.run(output_tensor,feed_dict={input_tensor_new:power_output,input_tensor:[X]})
+            
             end_time = time.time()
             print("Numpy inference(CPU) time is: ",end_time-start_time)
             img1 = tf.reshape(ret,[256,256,3])

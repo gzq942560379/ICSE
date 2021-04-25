@@ -21,7 +21,8 @@ def loss_function(net, content_features, style_features, content_weight, style_w
     # content_loss
     content_size = _tensor_size(content_features[CONTENT_LAYER])*batch_size
     assert _tensor_size(content_features[CONTENT_LAYER]) == _tensor_size(net[CONTENT_LAYER])
-    content_loss = ___________________
+    
+    content_loss = content_weight *
 
     # 计算风格损失
     # style_loss

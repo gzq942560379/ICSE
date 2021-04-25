@@ -69,13 +69,13 @@ def net(data_path, input_image):
 
 def _conv_layer(input, weights, bias):
     # TODO: 定义卷积层的操作步骤，input 为输入张量，weights 为权重参数，bias 为偏置参数，返回计算的结果
-    current = tf.nn.conv2d(input,weights,strides=1,padding="SAME")
+    current = tf.nn.conv2d(input,weights,strides=(1, 1, 1, 1),padding="SAME")
     current = tf.nn.bias_add(current,bias)
     return current
 
 def _pool_layer(input):
     # TODO: 定义最大池化的操作步骤，input 为输入张量，返回池化操作后的计算结果
-    return tf.nn.max_pool(input,ksize=2,strides=2,padding="VALID")
+    return tf.nn.max_pool(input,ksize=(1, 2, 2, 1),strides=(1, 2, 2, 1),padding="VALID")
 
 def preprocess(image,mean):
     return image - mean

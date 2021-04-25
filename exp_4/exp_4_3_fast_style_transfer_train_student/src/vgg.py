@@ -34,13 +34,16 @@ def net(data_path, input_image):
         kind = name[:4]
         if kind == 'conv':
             # TODO：如果当前层为卷积层，则进行卷积计算，计算结果为 current
-            current = ___________________
+            kernels, bias = weights[i][0][0][0][0]
+            kernels = kernels.transpose([1,0,2,3])
+            bias = bias.reshape([-1])
+            current = _conv_layer(current,kernels,bias)
         elif kind == 'relu':
             # TODO：如果当前层为 ReLU 层，则进行 ReLU 计算，计算结果为 current
-            current = ___________________
+            current = tf.nn.relu(current)
         elif kind == 'pool':
             # TODO：如果当前层为池化层，则进行最大池化计算，计算结果为 current
-            current = ___________________
+            current = _pool_layer(current)
         net[name] = current
 
     assert len(net) == len(layers)

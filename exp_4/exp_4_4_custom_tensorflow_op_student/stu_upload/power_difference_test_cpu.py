@@ -1,3 +1,4 @@
+# coding:utf-8
 import numpy as np
 import os
 import time
@@ -9,9 +10,11 @@ from power_diff_numpy import *
 def power_difference_op(input_x,input_y,input_pow):
     with tf.Session() as sess:
         # TODO：完成TensorFlow接口调用
-        ______________________
-        out = tf.power_difference(...)
-        return sess.run(out, feed_dict = {...})
+        x = tf.constant(input_x.astype(np.float32))
+        y =  tf.constant(input_y.astype(np.float32))
+        pow = tf.constant(input_pow.astype(np.float32))
+        out = tf.power_difference(x,y,pow)
+        return sess.run(out)
 
 def main():
     value = 256
