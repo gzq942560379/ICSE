@@ -2,4 +2,11 @@
 *.mat
 exp_4/env/neuware
 exp_4/env/tensorflow-v1.10
-
+*.pb
+*.whl
+*.so
+*.cambricon
+*.cambricon_twins
+core.*
+build
+neuware
