@@ -1,7 +1,8 @@
 *.pyc
 *.mat
-exp_4/env/neuware
-exp_4/env/tensorflow-v1.10
+neuware
+tensorflow-v1.10
+Cambricon-CNPlugin-MLU270
 *.pb
 *.whl
 *.so

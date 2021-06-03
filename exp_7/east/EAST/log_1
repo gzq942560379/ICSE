@@ -1,0 +1,39 @@
+make: Entering directory '/opt/code_chap_7_student/east/EAST/lanms'
+make: 'adaptor.so' is up to date.
+make: Leaving directory '/opt/code_chap_7_student/east/EAST/lanms'
+WARNING:tensorflow:
+The TensorFlow contrib module will not be included in TensorFlow 2.0.
+For more information, please see:
+  * https://github.com/tensorflow/community/blob/master/rfcs/20180907-contrib-sunset.md
+  * https://github.com/tensorflow/addons
+  * https://github.com/tensorflow/io (for I/O related ops)
+If you depend on functionality not listed there, please file an issue.
+
+WARNING:tensorflow:From /usr/local/lib/python2.7/dist-packages/tensorflow/contrib/memory_saving_gradients/memory_saving_gradients.py:20: The name tf.GraphKeys is deprecated. Please use tf.compat.v1.GraphKeys instead.
+
+WARNING:tensorflow:From eval.py:237: The name tf.app.run is deprecated. Please use tf.compat.v1.app.run instead.
+
+Traceback (most recent call last):
+  File "eval.py", line 237, in <module>
+    tf.app.run()
+  File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/platform/app.py", line 40, in run
+    _run(main=main, argv=argv, flags_parser=_parse_flags_tolerate_undef)
+  File "/usr/local/lib/python2.7/dist-packages/absl/app.py", line 293, in run
+    flags_parser,
+  File "/usr/local/lib/python2.7/dist-packages/absl/app.py", line 362, in _run_init
+    flags_parser=flags_parser,
+  File "/usr/local/lib/python2.7/dist-packages/absl/app.py", line 212, in _register_and_parse_flags_with_usage
+    args_to_main = flags_parser(original_argv)
+  File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/platform/app.py", line 31, in _parse_flags_tolerate_undef
+    return flags.FLAGS(_sys.argv if argv is None else argv, known_only=True)
+  File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/platform/flags.py", line 112, in __call__
+    return self.__dict__['__wrapped'].__call__(*args, **kwargs)
+  File "/usr/local/lib/python2.7/dist-packages/absl/flags/_flagvalues.py", line 626, in __call__
+    unknown_flags, unparsed_args = self._parse_args(args, known_only)
+  File "/usr/local/lib/python2.7/dist-packages/absl/flags/_flagvalues.py", line 774, in _parse_args
+    flag.parse(value)
+  File "/usr/local/lib/python2.7/dist-packages/absl/flags/_flag.py", line 166, in parse
+    self.value = self._parse(argument)
+  File "/usr/local/lib/python2.7/dist-packages/absl/flags/_flag.py", line 184, in _parse
+    'flag --%s=%s: %s' % (self.name, argument, e))
+absl.flags._exceptions.IllegalFlagValueError: flag --batch_size=: invalid literal for int() with base 10: ''
